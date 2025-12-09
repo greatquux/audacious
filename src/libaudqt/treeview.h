@@ -29,16 +29,28 @@ namespace audqt
 // This class extends QTreeView and adds:
 //  - A method to remove all selected rows (Delete key)
 //  - Some useful QStyle overrides
+//  - Optional support for playlist context menu (stopAfterThisEntry)
 class LIBAUDQT_PUBLIC TreeView : public QTreeView
 {
+    Q_OBJECT
+
 public:
     TreeView(QWidget * parent = nullptr);
     ~TreeView() override;
 
     void removeSelectedRows();
+    /* Set playlist context menu support. Call this after initialization
+     * to enable "Stop After This Song" option in the context menu.
+     * Pass a callback that returns the active Playlist for a given row. */
+    void setPlaylistContextMenu(
+        bool (*getPlaylist)(int row, class Playlist & playlist_out));
 
 protected:
     void keyPressEvent(QKeyEvent * event) override;
+    void contextMenuEvent(QContextMenuEvent * event) override;
+
+private:
+    bool (*m_get_playlist)(int row, class Playlist & playlist_out) = nullptr;
 };
 
 } // namespace audqt

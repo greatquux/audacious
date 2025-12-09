@@ -539,21 +539,39 @@ EXPORT void InputPlugin::write_audio(const void * data, int length)
 {
     auto mh = mutex.take();
     if (!in_sync(mh))
-        return;
+        else
+        {
+            int target_entry = aud_get_int("stop_after_entry");
+            int target_playlist = aud_get_int("stop_after_playlist");
 
-    // fetch A-B repeat settings
-    int a = pb_control.repeat_a;
-    int b = pb_control.repeat_b;
+            if (target_entry >= 0 && target_playlist >= 0 &&
+                target_playlist == playlist.index() &&
+                target_entry == playlist.get_position())
+            {
+                do_stop();
+                /* clear the target so it doesn't trigger again */
+                aud_set_int("stop_after_playlist", -1);
+                aud_set_int("stop_after_entry", -1);
+                do_next();
+            }
+            else if (aud_get_bool("stop_after_current_song"))
+            {
+                do_stop();
+                do_next();
+            }
+            else
+            {
+                /* if 10 songs in a row have failed, or if the entire playlist
+                 * (for playlists less than 10 songs) has failed, stop trying
+                 */
+                if (failed_entries < aud::min(playlist.n_entries(), 10))
+                    do_next();
+                else
+                    do_stop();
+            }
+            return;
+        }
 
-    mh.unlock();
-
-    // it's okay to call output_write_audio() even if we are no longer in sync,
-    // since it will return immediately if output_flush() has been called
-    int stop_time = (b >= 0) ? b : pb_info.stop_time;
-    if (output_write_audio(data, length, stop_time))
-        return;
-
-    mh.lock();
 
     if (!in_sync(mh))
         return;

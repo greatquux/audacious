@@ -76,6 +76,11 @@ void audgui_jump_to_track_hide ();
 void audgui_import_playlist ();
 void audgui_export_playlist ();
 
+/* playlist-context.c */
+/* Creates a context menu for a selected playlist entry. The caller must
+ * populate and display the menu. Returns a new GtkMenu. */
+GtkWidget * audgui_playlist_context_menu (Playlist playlist, int entry);
+
 /* plugin-menu.c */
 void audgui_plugin_menu_add (AudMenuID id, void (* func) (), const char * name, const char * icon);
 void audgui_plugin_menu_remove (AudMenuID id, void (* func) ());

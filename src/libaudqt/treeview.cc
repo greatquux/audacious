@@ -21,11 +21,16 @@
 #include "libaudqt.h"
 
 #include <QApplication>
+#include <QContextMenuEvent>
 #include <QKeyEvent>
+#include <QMenu>
 #include <QMouseEvent>
 #include <QProxyStyle>
 
+#include <libaudcore/drct.h>
+#include <libaudcore/i18n.h>
 #include <libaudcore/index.h>
+#include <libaudcore/playlist.h>
 
 namespace audqt
 {
@@ -83,6 +88,10 @@ EXPORT TreeView::TreeView(QWidget * parent) : QTreeView(parent)
     auto style = new TreeViewStyleOverrides;
     style->setParent(this);
     setStyle(style);
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, &QWidget::customContextMenuRequested, this, [this](const QPoint & pos) {
+        contextMenuEvent(nullptr);
+    });
 }
 
 EXPORT TreeView::~TreeView() {}
@@ -100,6 +109,36 @@ EXPORT void TreeView::keyPressEvent(QKeyEvent * event)
     QTreeView::keyPressEvent(event);
 }
 
+EXPORT void TreeView::contextMenuEvent(QContextMenuEvent * event)
+{
+    if (!m_get_playlist)
+    {
+        QTreeView::contextMenuEvent(event);
+        return;
+    }
+
+    /* Get the row at the cursor */
+    QModelIndex idx = indexAt(mapFromGlobal(QCursor::pos()));
+    if (!idx.isValid())
+        return;
+
+    int row = idx.row();
+    Playlist playlist;
+    if (!m_get_playlist(row, playlist))
+        return;
+
+    /* Create context menu */
+    QMenu menu;
+
+    /* Add "Stop After This Song" option */
+    QAction * stop_after = menu.addAction(_("Stop After This Song"));
+    connect(stop_after, &QAction::triggered, [playlist, row]() {
+        aud_drct_pl_set_stop_after(playlist.index(), row);
+    });
+
+    menu.exec(QCursor::pos());
+}
+
 EXPORT void TreeView::removeSelectedRows()
 {
     // get all selected rows
@@ -114,6 +153,12 @@ EXPORT void TreeView::removeSelectedRows()
     auto m = model();
     for (int row : rows)
         m->removeRow(row);
+}
+
+EXPORT void TreeView::setPlaylistContextMenu(
+    bool (*getPlaylist)(int row, class Playlist & playlist_out))
+{
+    m_get_playlist = getPlaylist;
 }
 
 } // namespace audqt

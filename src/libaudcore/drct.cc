@@ -273,3 +273,24 @@ EXPORT void aud_drct_pl_open_temp_list(Index<PlaylistAddItem> && items)
 {
     add_list(std::move(items), -1, true, true);
 }
+
+EXPORT void aud_drct_pl_set_stop_after(int playlist_index, int entry)
+{
+    aud_set_int("stop_after_playlist", playlist_index);
+    aud_set_int("stop_after_entry", entry);
+    /* disable legacy boolean to avoid conflict */
+    aud_set_bool("stop_after_current_song", false);
+}
+
+EXPORT void aud_drct_pl_clear_stop_after()
+{
+    aud_set_int("stop_after_playlist", -1);
+    aud_set_int("stop_after_entry", -1);
+    aud_set_bool("stop_after_current_song", false);
+}
+
+EXPORT void aud_drct_pl_get_stop_after(int & playlist_index, int & entry)
+{
+    playlist_index = aud_get_int("stop_after_playlist");
+    entry = aud_get_int("stop_after_entry");
+}

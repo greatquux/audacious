@@ -92,6 +92,8 @@ static const char * const core_defaults[] = {
     "shuffle", "FALSE",
     "step_size", "5",
     "stop_after_current_song", "FALSE",
+    "stop_after_playlist", "-1",
+    "stop_after_entry", "-1",
 
     /* playlist */
     "chardet_fallback", "ISO-8859-1",

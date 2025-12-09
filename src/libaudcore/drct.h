@@ -108,4 +108,11 @@ void aud_drct_pl_open_list(Index<PlaylistAddItem> && items);
 void aud_drct_pl_open_temp(const char * filename);
 void aud_drct_pl_open_temp_list(Index<PlaylistAddItem> && items);
 
+/* stop-after target API
+ * set a playlist index and entry to stop after (both zero-based). Use -1 to
+ * clear the target. */
+void aud_drct_pl_set_stop_after(int playlist_index, int entry);
+void aud_drct_pl_clear_stop_after();
+void aud_drct_pl_get_stop_after(int & playlist_index, int & entry);
+
 #endif

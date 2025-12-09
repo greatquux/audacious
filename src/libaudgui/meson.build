@@ -14,6 +14,7 @@ libaudgui_sources = [
   'list.cc',
   'menu.cc',
   'pixbufs.cc',
+  'playlist-context.cc',
   'playlists.cc',
   'plugin-menu.cc',
   'plugin-prefs.cc',
