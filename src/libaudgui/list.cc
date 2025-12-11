@@ -253,13 +253,14 @@ static gboolean button_press_cb (GtkWidget * widget, GdkEventButton * event,
             model->frozen = false;
         }
 
-        /* Always show playlist context menu for right-click */
-        extern void audgui_playlist_right_click (void * user, GdkEventButton * event);
-        audgui_playlist_right_click (widget, event);
-
-        /* Also call custom callback if provided */
         if (MODEL_HAS_CB (model, right_click))
             model->cbs->right_click (model->user, event);
+        else
+        {
+            /* Default: show playlist context menu */
+            extern void audgui_playlist_right_click (void * user, GdkEventButton * event);
+            audgui_playlist_right_click (widget, event);
+        }
 
         if (path)
             gtk_tree_path_free (path);
