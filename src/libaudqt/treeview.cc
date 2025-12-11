@@ -90,8 +90,22 @@ EXPORT TreeView::TreeView(QWidget * parent) : QTreeView(parent)
     setStyle(style);
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, &QWidget::customContextMenuRequested, this, [this](const QPoint & pos) {
-        m_context_menu_pos = pos;
-        contextMenuEvent(nullptr);
+        if (!m_get_playlist)
+            return;
+
+        QModelIndex idx = indexAt(mapFromGlobal(pos));
+        if (!idx.isValid())
+            return;
+
+        int row = idx.row();
+
+        QMenu menu;
+        QAction * stop_after = menu.addAction(_("Stop After This Song"));
+        connect(stop_after, &QAction::triggered, [this, row]() {
+            on_stop_after_clicked(row);
+        });
+
+        menu.exec(pos);
     });
 }
 
@@ -108,33 +122,6 @@ EXPORT void TreeView::keyPressEvent(QKeyEvent * event)
     }
 
     QTreeView::keyPressEvent(event);
-}
-
-EXPORT void TreeView::contextMenuEvent(QContextMenuEvent * event)
-{
-    if (!m_get_playlist)
-    {
-        QTreeView::contextMenuEvent(event);
-        return;
-    }
-
-    /* Get the row at the menu position */
-    QModelIndex idx = indexAt(mapFromGlobal(m_context_menu_pos));
-    if (!idx.isValid())
-        return;
-
-    int row = idx.row();
-
-    /* Create context menu */
-    QMenu menu;
-
-    /* Add "Stop After This Song" option */
-    QAction * stop_after = menu.addAction(_("Stop After This Song"));
-    connect(stop_after, &QAction::triggered, [this, row]() {
-        on_stop_after_clicked(row);
-    });
-
-    menu.exec(m_context_menu_pos);
 }
 
 EXPORT void TreeView::removeSelectedRows()

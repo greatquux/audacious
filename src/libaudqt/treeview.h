@@ -21,7 +21,6 @@
 #define LIBAUDQT_TREEVIEW_H
 
 #include <QTreeView>
-#include <QPoint>
 #include <libaudqt/export.h>
 
 // Forward declare Playlist in global namespace
@@ -49,12 +48,10 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent * event) override;
-    void contextMenuEvent(QContextMenuEvent * event) override;
 
 private:
     void on_stop_after_clicked(int row);
     bool (*m_get_playlist)(int row, class Playlist & playlist_out) = nullptr;
-    QPoint m_context_menu_pos;
 };
 
 } // namespace audqt
