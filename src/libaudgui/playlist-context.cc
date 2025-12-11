@@ -25,6 +25,7 @@
 
 #include "libaudgui.h"
 #include "libaudgui-gtk.h"
+#include "list.h"
 
 static void stop_after_this (GtkWidget * item, void * data)
 {
@@ -68,7 +69,7 @@ static void playlist_right_click (void * user, GdkEventButton * event)
     
     /* Get the active playlist */
     Playlist playlist = Playlist::active_playlist();
-    if (!playlist)
+    if (!playlist.exists())
         return;
     
     /* Create and show the context menu */

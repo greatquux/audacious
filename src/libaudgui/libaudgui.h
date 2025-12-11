@@ -23,6 +23,11 @@
 #include <libaudcore/index.h>
 #include <libaudcore/objects.h>
 
+/* Forward declarations */
+union _GdkEvent;
+struct _GdkEventButton;
+typedef struct _GdkEventButton GdkEventButton;
+
 enum class AudMenuID;
 enum class PluginType;
 class Playlist;
