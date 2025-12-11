@@ -90,9 +90,6 @@ EXPORT TreeView::TreeView(QWidget * parent) : QTreeView(parent)
     setStyle(style);
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, &QWidget::customContextMenuRequested, this, [this](const QPoint & pos) {
-        if (!m_get_playlist)
-            return;
-
         QModelIndex idx = indexAt(mapFromGlobal(pos));
         if (!idx.isValid())
             return;
@@ -142,14 +139,21 @@ EXPORT void TreeView::removeSelectedRows()
 
 void TreeView::on_stop_after_clicked(int row)
 {
-    if (!m_get_playlist)
-        return;
-
     Playlist playlist;
-    if (m_get_playlist(row, playlist))
+    
+    if (m_get_playlist)
     {
-        aud_drct_pl_set_stop_after(playlist.index(), row);
+        // Use the provided callback if available
+        if (!m_get_playlist(row, playlist))
+            return;
     }
+    else
+    {
+        // Fall back to active playlist if no callback provided
+        playlist = Playlist::active_playlist();
+    }
+
+    aud_drct_pl_set_stop_after(playlist.index(), row);
 }
 
 EXPORT void TreeView::setPlaylistContextMenu(
