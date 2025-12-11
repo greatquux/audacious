@@ -28,6 +28,7 @@ enum class PluginType;
 class Playlist;
 class PluginHandle;
 struct EqualizerPreset;
+typedef struct _GtkWidget GtkWidget;
 
 /* about.c */
 void audgui_show_about_window ();

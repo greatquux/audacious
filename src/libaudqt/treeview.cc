@@ -123,17 +123,14 @@ EXPORT void TreeView::contextMenuEvent(QContextMenuEvent * event)
         return;
 
     int row = idx.row();
-    Playlist playlist;
-    if (!m_get_playlist(row, playlist))
-        return;
 
     /* Create context menu */
     QMenu menu;
 
     /* Add "Stop After This Song" option */
     QAction * stop_after = menu.addAction(_("Stop After This Song"));
-    connect(stop_after, &QAction::triggered, [playlist, row]() {
-        aud_drct_pl_set_stop_after(playlist.index(), row);
+    connect(stop_after, &QAction::triggered, [this, row]() {
+        on_stop_after_clicked(row);
     });
 
     menu.exec(QCursor::pos());
@@ -153,6 +150,18 @@ EXPORT void TreeView::removeSelectedRows()
     auto m = model();
     for (int row : rows)
         m->removeRow(row);
+}
+
+void TreeView::on_stop_after_clicked(int row)
+{
+    if (!m_get_playlist)
+        return;
+
+    Playlist playlist;
+    if (m_get_playlist(row, playlist))
+    {
+        aud_drct_pl_set_stop_after(playlist.index(), row);
+    }
 }
 
 EXPORT void TreeView::setPlaylistContextMenu(

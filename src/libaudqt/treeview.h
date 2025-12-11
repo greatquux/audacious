@@ -23,6 +23,9 @@
 #include <QTreeView>
 #include <libaudqt/export.h>
 
+// Forward declare Playlist in global namespace
+class Playlist;
+
 namespace audqt
 {
 
@@ -32,8 +35,6 @@ namespace audqt
 //  - Optional support for playlist context menu (stopAfterThisEntry)
 class LIBAUDQT_PUBLIC TreeView : public QTreeView
 {
-    Q_OBJECT
-
 public:
     TreeView(QWidget * parent = nullptr);
     ~TreeView() override;
@@ -50,6 +51,7 @@ protected:
     void contextMenuEvent(QContextMenuEvent * event) override;
 
 private:
+    void on_stop_after_clicked(int row);
     bool (*m_get_playlist)(int row, class Playlist & playlist_out) = nullptr;
 };
 
