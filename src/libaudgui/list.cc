@@ -241,8 +241,7 @@ static gboolean button_press_cb (GtkWidget * widget, GdkEventButton * event,
     gtk_tree_view_get_path_at_pos ((GtkTreeView *) widget, event->x, event->y,
      & path, nullptr, nullptr, nullptr);
 
-    if (event->type == GDK_BUTTON_PRESS && event->button == 3
-     && MODEL_HAS_CB (model, right_click))
+    if (event->type == GDK_BUTTON_PRESS && event->button == 3)
     {
         /* Only allow GTK to select this row if it is not already selected.  We
          * don't want to clear a multiple selection. */
@@ -254,7 +253,16 @@ static gboolean button_press_cb (GtkWidget * widget, GdkEventButton * event,
             model->frozen = false;
         }
 
-        model->cbs->right_click (model->user, event);
+        if (MODEL_HAS_CB (model, right_click))
+        {
+            model->cbs->right_click (model->user, event);
+        }
+        else
+        {
+            /* Default: show playlist context menu */
+            extern void audgui_playlist_right_click (void * user, GdkEventButton * event);
+            audgui_playlist_right_click (widget, event);
+        }
 
         if (path)
             gtk_tree_path_free (path);

@@ -55,3 +55,28 @@ EXPORT GtkWidget * audgui_playlist_context_menu (Playlist playlist, int entry)
     
     return menu;
 }
+
+/* Default right-click handler for playlist lists */
+static void playlist_right_click (void * user, GdkEventButton * event)
+{
+    GtkWidget * list = (GtkWidget *)user;
+    
+    /* Get the clicked row */
+    int row = audgui_list_row_at_point(list, event->x, event->y);
+    if (row < 0)
+        return;
+    
+    /* Get the active playlist */
+    Playlist playlist = Playlist::active_playlist();
+    if (!playlist)
+        return;
+    
+    /* Create and show the context menu */
+    GtkWidget * menu = audgui_playlist_context_menu(playlist, row);
+    gtk_menu_popup_at_pointer((GtkMenu *)menu, (GdkEvent *)event);
+}
+
+EXPORT void audgui_playlist_right_click (void * user, GdkEventButton * event)
+{
+    playlist_right_click(user, event);
+}
