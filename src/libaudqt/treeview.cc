@@ -90,6 +90,7 @@ EXPORT TreeView::TreeView(QWidget * parent) : QTreeView(parent)
     setStyle(style);
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, &QWidget::customContextMenuRequested, this, [this](const QPoint & pos) {
+        m_context_menu_pos = pos;
         contextMenuEvent(nullptr);
     });
 }
@@ -117,8 +118,8 @@ EXPORT void TreeView::contextMenuEvent(QContextMenuEvent * event)
         return;
     }
 
-    /* Get the row at the cursor */
-    QModelIndex idx = indexAt(mapFromGlobal(QCursor::pos()));
+    /* Get the row at the menu position */
+    QModelIndex idx = indexAt(mapFromGlobal(m_context_menu_pos));
     if (!idx.isValid())
         return;
 
@@ -133,7 +134,7 @@ EXPORT void TreeView::contextMenuEvent(QContextMenuEvent * event)
         on_stop_after_clicked(row);
     });
 
-    menu.exec(QCursor::pos());
+    menu.exec(m_context_menu_pos);
 }
 
 EXPORT void TreeView::removeSelectedRows()
