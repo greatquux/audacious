@@ -238,19 +238,35 @@ static void end_cb()
         // single-song repeats are handled in run_playback()
         do_stop();
     }
-    else if (aud_get_bool("stop_after_current_song"))
-    {
-        do_stop();
-        do_next();
-    }
     else
     {
-        // if 10 songs in a row have failed, or if the entire playlist
-        // (for playlists less than 10 songs) has failed, stop trying
-        if (failed_entries < aud::min(playlist.n_entries(), 10))
-            do_next();
-        else
+        int target_entry = aud_get_int("stop_after_entry");
+        int target_playlist = aud_get_int("stop_after_playlist");
+
+        if (target_entry >= 0 && target_playlist >= 0 &&
+            target_playlist == playlist.index() &&
+            target_entry == playlist.get_position())
+        {
             do_stop();
+            /* clear the target so it doesn't trigger again */
+            aud_set_int("stop_after_playlist", -1);
+            aud_set_int("stop_after_entry", -1);
+            do_next();
+        }
+        else if (aud_get_bool("stop_after_current_song"))
+        {
+            do_stop();
+            do_next();
+        }
+        else
+        {
+            // if 10 songs in a row have failed, or if the entire playlist
+            // (for playlists less than 10 songs) has failed, stop trying
+            if (failed_entries < aud::min(playlist.n_entries(), 10))
+                do_next();
+            else
+                do_stop();
+        }
     }
 }
 
@@ -539,41 +555,6 @@ EXPORT void InputPlugin::write_audio(const void * data, int length)
 {
     auto mh = mutex.take();
     if (!in_sync(mh))
-        else
-        {
-            int target_entry = aud_get_int("stop_after_entry");
-            int target_playlist = aud_get_int("stop_after_playlist");
-
-            if (target_entry >= 0 && target_playlist >= 0 &&
-                target_playlist == playlist.index() &&
-                target_entry == playlist.get_position())
-            {
-                do_stop();
-                /* clear the target so it doesn't trigger again */
-                aud_set_int("stop_after_playlist", -1);
-                aud_set_int("stop_after_entry", -1);
-                do_next();
-            }
-            else if (aud_get_bool("stop_after_current_song"))
-            {
-                do_stop();
-                do_next();
-            }
-            else
-            {
-                /* if 10 songs in a row have failed, or if the entire playlist
-                 * (for playlists less than 10 songs) has failed, stop trying
-                 */
-                if (failed_entries < aud::min(playlist.n_entries(), 10))
-                    do_next();
-                else
-                    do_stop();
-            }
-            return;
-        }
-
-
-    if (!in_sync(mh))
         return;
 
     // if we are still in sync, then one of the following happened:
@@ -582,8 +563,8 @@ EXPORT void InputPlugin::write_audio(const void * data, int length)
     // 3. we've reached the end of a segmented track
     if (pb_control.seek < 0)
     {
-        if (b >= 0)
-            request_seek(mh, a);
+        if (pb_control.repeat_b >= 0)
+            request_seek(mh, pb_control.repeat_a);
         else
             pb_info.ended = true;
     }

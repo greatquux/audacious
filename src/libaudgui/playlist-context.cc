@@ -26,13 +26,13 @@
 #include "libaudgui.h"
 #include "libaudgui-gtk.h"
 
-static void stop_after_this (void * data)
+static void stop_after_this (GtkWidget * item, void * data)
 {
-    auto user_data = (const Playlist *)data;
-    int entry = GPOINTER_TO_INT(g_object_get_data((GObject *)data, "entry"));
+    auto playlist_ptr = (Playlist *)data;
+    int entry = GPOINTER_TO_INT(g_object_get_data((GObject *)item, "entry"));
     
     /* Set the stop-after target to this entry */
-    aud_drct_pl_set_stop_after(user_data->index(), entry);
+    aud_drct_pl_set_stop_after(playlist_ptr->index(), entry);
 }
 
 EXPORT GtkWidget * audgui_playlist_context_menu (Playlist playlist, int entry)
